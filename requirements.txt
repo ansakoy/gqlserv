@@ -1,0 +1,4 @@
+gql==3.4.1
+graphql-query==1.2.1
+pymongo==4.6.1
+strawberry-graphql==0.216.0

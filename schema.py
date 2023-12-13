@@ -3,7 +3,7 @@
 import typing
 import strawberry
 
-from db import AUTHORS_COLL_NAME, BOOKS_COLL_NAME, CONN, DB_NAME
+from db import AUTHORS_COLL_NAME, BOOKS_COLL_NAME, CONN, DB_NAME, add_book_to_author, get_new_id
 
 
 def get_author_for_book(root) -> "Author":
@@ -50,6 +50,29 @@ class Query:
     books: typing.List[Book] = strawberry.field(resolver=get_books)
 
 
-schema = strawberry.Schema(query=Query)
+@strawberry.type
+class Mutation:
+    @strawberry.field
+    def add_book(self, title: str, auth_id: int) -> Book:
+        books = CONN[DB_NAME][BOOKS_COLL_NAME]
+        new_id = get_new_id(books)
+        authors = CONN[DB_NAME][AUTHORS_COLL_NAME]
+        author = authors.find_one({"id": auth_id})
+        if author is None:
+            raise Exception(f"Can't find author with id {auth_id}")
+        existing_book = books.find_one({"title": title})
+        if existing_book is not None:
+            raise Exception(f"The book called {title} already exists")
+        books.insert_one({
+            "id": new_id,
+            "title": title,
+            "author": auth_id,
+        })
+        add_book_to_author(author, new_id)
+        new_book = books.find_one({"id": new_id})
+        return Book(title=new_book["title"], book_id=new_book["id"])
+
+
+schema = strawberry.Schema(query=Query, mutation=Mutation)
 
 

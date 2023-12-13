@@ -2,7 +2,7 @@
 Fort simplicity, we assume that the relationship between authors and book is one to many
 """
 
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 
 CONN = MongoClient("localhost", 27017)
 DB_NAME = "lib"
@@ -29,6 +29,23 @@ AUTHORS_BOOKS = {
     2: [1, 2],
     3: [4],
 }
+
+
+def get_new_id(coll):
+    """Imitate auto ID behaviour not to deal with _id"""
+    max_id = coll.find().sort([("id", DESCENDING)]).limit(1)[0]["id"]
+    return max_id + 1
+
+
+def add_book_to_author(author, book_id):
+    """Add a new book to author's record list"""
+    authors = CONN[DB_NAME][AUTHORS_COLL_NAME]
+    auths_books = set(author["books"])
+    auths_books.add(book_id)
+    authors.update_one(
+        {"_id": author["_id"]},
+        {"$set": {"books": list(auths_books)}},
+    )
 
 
 def get_author_id(book_id):

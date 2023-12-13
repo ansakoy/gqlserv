@@ -1,4 +1,4 @@
-# Queries Cheatsheet
+# Queries | Mutations Cheatsheet
 
 Here are the basic queries to check on our progress 
 directly in Graphiql (using GraphQL syntax) at http://0.0.0.0:8000/graphql:
@@ -30,5 +30,13 @@ query {
   books {
     title
   }
+}
+```
+Create a new book:
+```
+mutation {
+	addBook(title: "Idiot", authId: 1) {
+		title
+	}
 }
 ```

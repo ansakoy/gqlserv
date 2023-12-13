@@ -57,11 +57,34 @@ def perform_op(queries):
     pprint(result)
 
 
+def add_book(title, auth_id):
+    mutation = Query(
+        name="addBook",
+        arguments=[
+            Argument(name="title", value=f'"{title}"'),
+            Argument(name="authId", value=auth_id),
+        ],
+        fields=[
+            "title",
+            Field(name="author", fields=["name"]),
+        ]
+    )
+    operation = Operation(
+        type="mutation",
+        # name="addBook",
+        queries=[mutation],
+    )
+    print(operation.render())
+    query = gql(operation.render())
+    result = client.execute(query)
+    pprint(result)
+
+
 if __name__ == '__main__':
     # get_books()
     # get_authors()
-    perform_op([get_books_query(), get_authors_query()])
-    # {'books': [{'title': 'Jurassic Park'}], 'authors': [{'name': 'Michael Crichton'}]}
+    # perform_op([get_books_query(), get_authors_query()])
+    add_book("The Bronze Horseman", 3)
 
 
 
